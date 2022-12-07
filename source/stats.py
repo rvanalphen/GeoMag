@@ -37,10 +37,15 @@ def _plot_ks(x,y,x2,y2,df):
     plt.xlabel("bins (nT)")
     plt.show()
 
-def ks_test(observed: MagApp, model: PloufModel,bins: int = 10, key_name='line 1'):
+def ks_test(model: PloufModel,observed: MagApp = None, bins: int = 10, key_name='line 1'):
     
+    if observed != None:
+        observed = observed.lines[key_name]
+    else:
+        print(model)
+        observed = model.line
+        
     model = model.results
-    observed = observed.lines[key_name]
     
     dfree = len(observed)-1
 

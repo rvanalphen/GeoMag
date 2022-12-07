@@ -141,22 +141,24 @@ def plot_offset_profile(application: MagApp, offset=150) -> None:
             start_offset += offset
     plt.show()
 
-def plot_model(observed: MagApp, model: PloufModel,key_name='line 1',filt: bool = False) -> None:
-    observed = observed.lines[key_name]
-
+def plot_model(model: PloufModel) -> None:
+    
     fig, ax = plt.subplots(figsize=(10, 10))
 
-    if not filt:
-        ax.plot(observed.Northing,observed.Mag_nT,'go',ms=2,label='Observed')
-    else:
-        ax.plot(observed.Northing,observed.filtered,'go',ms=2,label='Observed Filtered')
-
+    ax.plot(model.line.Northing,model.line.Mag_nT,'go',ms=2,label='Observed')
 
     ax.plot(model.results.ydist,model.results.mag,'ro',ms=2,label='Calculated')
 
     ax.set_xlabel('Horizontal distance north from line center')
     ax.set_ylabel('Magnetic Anomaly (nT)')
     ax.legend(loc='lower left')
+    plt.show()
+
+def plot_line_and_polygon(model: PloufModel) -> None:
+    fig, ax = plt.subplots()
+    ax.plot(model.line.Easting,model.line.Northing,color='red',markersize=3,label='Cleaned Observed Data')
+    ax.plot(model.shape.Easting,model.shape.Northing,linestyle='dashed',color='black',label='Magnetic Body')
+    ax.legend()
     plt.show()
 
 def plot_residuals(model: PloufModel) -> None:
