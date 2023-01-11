@@ -5,34 +5,59 @@ from math import cos, sin,pi,sqrt,log,atan2
 from sklearn.model_selection import ParameterGrid
 from source.helper_functions import progress_bar
 from source.load_data import path_to_df
+from pathlib import Path
 
-def grid_search(observed: DataFrame,shape: DataFrame,parameter_dict: Dict,error_func: Callable, filt: bool = False):
-
-    grid_search = ParameterGrid(parameter_dict)
+def grid_search(observed: DataFrame,parameter_dict: Dict,error_func: Callable,shape: DataFrame=None, filt: bool = False):
+    grid_search = list(ParameterGrid(parameter_dict))
     grid_len = len(list(grid_search))
+    errors = {}
 
     current = 1000
+
     for i,grid in enumerate(grid_search):
-            progress_bar(i,grid_len)
-            
+            # progress_bar(i,grid_len)
+            # if i <= 3:
+        if isinstance(shape, DataFrame):
             model = PloufModel(
-                line = observed,
-                shape= shape,
-                top_bound= grid['top'],
-                bottom_bound= grid['bottom'],
-                inclination= -67,
-                declination= 177,
-                intensity= grid['intensity']
+            line = observed,
+            shape= shape,
+            top_bound= grid_search[i]['top'],
+            bottom_bound= grid_search[i]['bottom'],
+            inclination= -67,
+            declination= 177,
+            intensity= grid_search[i]['intensity']
             )
 
             model.run_plouf(filt)
 
             error = error_func(model)
-            
+
             if error < current:
                 current = error
                 good_grid = grid
-    
+
+        else:
+            model = None
+            err = None
+            
+            model = PloufModel(
+                line = observed,
+                shape= path_to_df(grid_search[i]['shape'],raw=False),
+                top_bound= grid_search[i]['top'],
+                bottom_bound= grid_search[i]['bottom'],
+                inclination= -67,
+                declination= 177,
+                intensity= grid_search[i]['intensity']
+            )
+            
+            model.run_plouf(filt)
+
+            error = error_func(model)
+
+            if error < current:
+                current = error
+                good_grid = grid
+
     return current,good_grid
 
 class PloufModel():
